@@ -1,0 +1,14 @@
+# src/main/resources/application.yaml
+
+server:
+  port: 8080 # Default server port
+
+spring:
+  profiles:
+    active: dev
+
+datasource:
+initialization-mode: always
+continue-on-error: true
+jpa:
+defer-datasource-initialization: true

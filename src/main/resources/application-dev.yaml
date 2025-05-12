@@ -1,0 +1,27 @@
+# src/main/resources/application-dev.yaml
+
+# --- Development Profile Configuration ---
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydatabase
+    username: postgresuser
+    password: postgrespassword
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database: postgresql  # Explicitly specify the database type
+    database-platform: org.hibernate.dialect.PostgreSQLDialect  # Explicitly set the dialect
+    hibernate:
+      ddl-auto: update # Or 'create' or 'create-drop' for development. 'update' is generally safe for development to add new columns. Be cautious in production!
+    show-sql: true # Good for development to see generated SQL
+    properties:
+      hibernate:
+        format_sql: true # Nicely format the SQL output
+  # Other dev-specific configurations can go here
+  # e.g., logging levels, specific feature flags, etc.
+
+logging:
+  level:
+    org.springframework.web: DEBUG # Example: Set web logging to DEBUG in dev
+    org.hibernate.SQL: DEBUG  # Added to help with SQL logging
+    org.hibernate.type.descriptor.sql: TRACE  # Shows parameter binding
+    # Add other package specific logging levels here
