@@ -3,6 +3,7 @@
 # --- Test Profile Configuration ---
 spring:
   datasource:
+    initialization-mode: always
     url: jdbc:h2:mem:testdb  # In-memory H2 database for testing
     driver-class-name: org.h2.Driver
     username: sa  # Standard username for H2
