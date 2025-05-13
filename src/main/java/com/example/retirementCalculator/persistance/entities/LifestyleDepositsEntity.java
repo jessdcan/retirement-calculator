@@ -7,7 +7,11 @@ import lombok.*;
 import java.math.BigDecimal;
 
 /**
- * Entity representing the lifestyle deposit information for retirement planning.
+ * Entity representing the lifestyle deposit information used in retirement planning calculations.
+ * <p>
+ * Maps to the <code>staging.lifestyle_deposits</code> table in the PostgreSQL database.
+ * This entity contains lifestyle type data, associated monthly deposits, and expected annual expenses.
+ * </p>
  */
 @Entity
 @Table(name = "lifestyle_deposits", schema = "staging")
@@ -17,23 +21,41 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class LifestyleDepositsEntity {
+    /**
+     * Primary key identifier for the lifestyle deposit record.
+     * Auto-generated using identity strategy.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-
-    @NotNull(message =  "lifestyleType cannot be null")
+    /**
+     * The type or category of lifestyle (e.g., 'modest', 'comfortable', etc.).
+     * Cannot be null.
+     */
+    @NotNull(message = "lifestyleType cannot be null")
     @Column(name = "lifestyle_type", nullable = false)
     private String lifestyleType;
 
-    @NotNull(message =  "monthlyDeposit cannot be null")
+    /**
+     * The expected monthly deposit amount for the given lifestyle.
+     * Cannot be null.
+     */
+    @NotNull(message = "monthlyDeposit cannot be null")
     @Column(name = "monthly_deposit", nullable = false, precision = 10, scale = 2)
     private BigDecimal monthlyDeposit;
 
-    @NotNull(message =  "annualExpenses cannot be null")
+    /**
+     * The expected annual expenses for the lifestyle.
+     * Cannot be null.
+     */
+    @NotNull(message = "annualExpenses cannot be null")
     @Column(name = "annual_expenses", nullable = false, precision = 12, scale = 2)
     private BigDecimal annualExpenses;
 
+    /**
+     * Optional description providing additional context or notes about the lifestyle type.
+     */
     @Column(name = "description")
     private String description;
 }
