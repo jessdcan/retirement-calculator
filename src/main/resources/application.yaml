@@ -1,5 +1,6 @@
 # src/main/resources/application.yaml
 
+
 server:
   port: 8080 # Default server port
 

@@ -1,0 +1,39 @@
+# src/main/resources/application-test.yaml
+
+# --- Test Profile Configuration ---
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb  # In-memory H2 database for testing
+    driver-class-name: org.h2.Driver
+    username: sa  # Standard username for H2
+    password: ''  # No password for in-memory database
+
+  # H2 console configuration (optional, but useful for debugging)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    database: h2
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop # Creates the schema and drops it at the end of the session
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Testing-specific configurations
+  test:
+    database:
+      replace: none  # Prevents Spring Boot from replacing the configured DataSource
+
+logging:
+  level:
+    org.springframework.test: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+
+# Additional test-specific properties can be added here
+# For example, mock service configurations, test data loading, etc.
