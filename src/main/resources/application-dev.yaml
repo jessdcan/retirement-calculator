@@ -15,14 +15,15 @@ spring:
     show-sql: true
     properties:
       hibernate:
+        default_schema: staging
+        show-sql: true
         format_sql: true
 
   redis:
-    image: redis:latest
-    container_name: my-redis
-    ports: "6379:6379"
-    volumes: redis-data:/data
-    restart: unless-stopped
+    host: localhost   # Add this line to specify the host
+    port: 6379        # Default Redis port
+    password: ""      # Redis password, if applicable
+    timeout: 5000
 
 logging:
   level:

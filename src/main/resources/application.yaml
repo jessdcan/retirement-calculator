@@ -6,7 +6,7 @@ server:
 
 spring:
   profiles:
-    active: test
+    active: dev
 
 datasource:
 initialization-mode: always
