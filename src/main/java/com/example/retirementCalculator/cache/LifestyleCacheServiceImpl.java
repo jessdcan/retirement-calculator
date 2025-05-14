@@ -4,10 +4,8 @@ import com.example.retirementCalculator.api.controllers.RetirementCalculatorCont
 import com.example.retirementCalculator.exception.CacheException;
 import com.example.retirementCalculator.persistance.entities.LifestyleDepositsEntity;
 import com.example.retirementCalculator.persistance.repositories.LifestyleDepositsRepo;
-import com.example.retirementCalculator.cache.LifestyleCacheService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
