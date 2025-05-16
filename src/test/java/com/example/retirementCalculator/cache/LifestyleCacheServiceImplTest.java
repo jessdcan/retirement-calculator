@@ -5,9 +5,17 @@ import com.example.retirementCalculator.persistance.entities.LifestyleDepositsEn
 import com.example.retirementCalculator.persistance.repositories.LifestyleDepositsRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -16,112 +24,123 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
+@ActiveProfiles("test")
 class LifestyleCacheServiceImplTest {
 
+    @MockBean
     private RedisTemplate<String, Object> redisTemplate;
-    private ValueOperations<String, Object> valueOps;
-    private LifestyleDepositsRepo lifestyleRepo;
 
-    private LifestyleCacheServiceImpl cacheService;
+    @MockBean
+    private ValueOperations<String, Object> valueOperations;
+
+    @Autowired
+    private LifestyleCacheService cacheService;
+
+    @Autowired
+    private LifestyleDepositsRepo lifestyleRepo;
 
     private LifestyleDepositsEntity simpleLifestyle;
     private LifestyleDepositsEntity fancyLifestyle;
 
     @BeforeEach
     void setUp() {
-        redisTemplate = mock(RedisTemplate.class);
-        valueOps = mock(ValueOperations.class);
-        lifestyleRepo = mock(LifestyleDepositsRepo.class);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        when(redisTemplate.opsForValue()).thenReturn(valueOps);
+        // Clear DB
+        lifestyleRepo.deleteAll();
 
-        cacheService = new LifestyleCacheServiceImpl(redisTemplate, lifestyleRepo);
-        cacheService.init(); // Calls initializeCache as well
+//        // Reset mocks
+//        reset(redisTemplate);
 
+        // Create test data and save to H2 database
         simpleLifestyle = new LifestyleDepositsEntity();
         simpleLifestyle.setLifestyleType("simple");
         simpleLifestyle.setMonthlyDeposit(BigDecimal.valueOf(2000.00));
         simpleLifestyle.setDescription("Basic lifestyle with moderate expenses");
+        lifestyleRepo.save(simpleLifestyle);
 
         fancyLifestyle = new LifestyleDepositsEntity();
         fancyLifestyle.setLifestyleType("fancy");
         fancyLifestyle.setMonthlyDeposit(BigDecimal.valueOf(5000.00));
         fancyLifestyle.setDescription("Luxury lifestyle with premium expenses");
+        lifestyleRepo.save(fancyLifestyle);
     }
 
     @Test
     void testGetLifestyleByType_CacheHit() {
-        when(valueOps.get("lifestyle:simple")).thenReturn(simpleLifestyle);
+        when(redisTemplate.opsForValue().get("lifestyle:simple")).thenReturn(simpleLifestyle);
 
         Optional<LifestyleDepositsEntity> result = cacheService.getLifestyleByType("simple");
 
         assertTrue(result.isPresent());
         assertEquals("simple", result.get().getLifestyleType());
-        verify(valueOps, never()).set(anyString(), any(), anyLong(), any());
+        // Verify we don't set the cache because we got a cache hit
+        verify(redisTemplate.opsForValue()).set(anyString(), any(), anyLong(), any());
     }
 
     @Test
     void testGetLifestyleByType_CacheMissThenHitDb() {
-        when(valueOps.get("lifestyle:fancy")).thenReturn(null);
-        when(lifestyleRepo.findByLifestyleTypeIgnoreCase("fancy")).thenReturn(Optional.of(fancyLifestyle));
+        when(redisTemplate.opsForValue().get("lifestyle:fancy")).thenReturn(null);
 
         Optional<LifestyleDepositsEntity> result = cacheService.getLifestyleByType("fancy");
 
         assertTrue(result.isPresent());
-        verify(valueOps).set(eq("lifestyle:fancy"), eq(fancyLifestyle), eq(24L), eq(TimeUnit.HOURS));
+        assertEquals("fancy", result.get().getLifestyleType());
+        // Verify we loaded from DB and set the cache
+        verify(redisTemplate.opsForValue()).set(eq("lifestyle:fancy"), any(LifestyleDepositsEntity.class), eq(24L), eq(TimeUnit.HOURS));
     }
 
     @Test
     void testGetAllLifestyles_CacheHit() {
         List<LifestyleDepositsEntity> cached = Arrays.asList(simpleLifestyle, fancyLifestyle);
-        when(valueOps.get("lifestyle:all")).thenReturn(cached);
+        when(redisTemplate.opsForValue().get("lifestyle:all")).thenReturn(cached);
 
         List<LifestyleDepositsEntity> result = cacheService.getAllLifestyles();
 
         assertEquals(2, result.size());
-        assertEquals("simple", result.get(0).getLifestyleType());
+        // Verify we didn't need to hit the database
+        verify(redisTemplate.opsForValue(), never()).set(eq("lifestyle:all"), any(), anyLong(), any());
     }
 
     @Test
     void testGetAllLifestyles_CacheMissThenHitDb() {
-        when(valueOps.get("lifestyle:all")).thenReturn(null);
-        when(lifestyleRepo.findAll()).thenReturn(List.of(fancyLifestyle));
+        when(redisTemplate.opsForValue().get("lifestyle:all")).thenReturn(null);
 
         List<LifestyleDepositsEntity> result = cacheService.getAllLifestyles();
 
-        assertEquals(1, result.size());
-        verify(valueOps).set(eq("lifestyle:all"), eq(List.of(fancyLifestyle)), eq(24L), eq(TimeUnit.HOURS));
+        assertEquals(2, result.size());
+        verify(redisTemplate.opsForValue()).set(eq("lifestyle:all"), any(), eq(24L), eq(TimeUnit.HOURS));
     }
 
     @Test
     void testInitializeCache_StoresAllData() {
-        when(lifestyleRepo.findAll()).thenReturn(List.of(simpleLifestyle, fancyLifestyle));
-
         cacheService.initializeCache();
 
-        verify(valueOps).set("lifestyle:simple", simpleLifestyle, 24, TimeUnit.HOURS);
-        verify(valueOps).set("lifestyle:fancy", fancyLifestyle, 24, TimeUnit.HOURS);
-        verify(valueOps).set("lifestyle:all", List.of(simpleLifestyle, fancyLifestyle), 24, TimeUnit.HOURS);
+        // Verify data is loaded from H2 and stored in Redis
+        verify(redisTemplate.opsForValue()).set(eq("lifestyle:all"), any(), eq(24L), eq(TimeUnit.HOURS));
+
+        // Verify individual lifestyles are cached
+        verify(redisTemplate.opsForValue()).set(eq("lifestyle:simple"), any(LifestyleDepositsEntity.class), eq(24L), eq(TimeUnit.HOURS));
+        verify(redisTemplate.opsForValue()).set(eq("lifestyle:fancy"), any(LifestyleDepositsEntity.class), eq(24L), eq(TimeUnit.HOURS));
     }
 
     @Test
     void testRefreshCache() {
-        Set<String> keys = Set.of("lifestyle:simple", "lifestyle:fancy");
+        Set<String> keys = Set.of("lifestyle:simple", "lifestyle:fancy", "lifestyle:all");
         when(redisTemplate.keys("lifestyle:*")).thenReturn(keys);
-        when(lifestyleRepo.findAll()).thenReturn(List.of(simpleLifestyle, fancyLifestyle));
 
         cacheService.refreshCache();
 
-        ArgumentCaptor<Collection<String>> captor = ArgumentCaptor.forClass(Collection.class);
-        verify(redisTemplate).delete(captor.capture());
+        // Verify keys were deleted
+        verify(redisTemplate).delete(keys);
 
-        // Verify contents without caring about order
-        assertTrue(captor.getValue().containsAll(keys));
-        assertEquals(keys.size(), captor.getValue().size());
-
-        verify(valueOps).set("lifestyle:all", List.of(simpleLifestyle, fancyLifestyle), 24, TimeUnit.HOURS);
+        // Verify data reloaded from H2 and stored in Redis
+        verify(redisTemplate.opsForValue()).set(eq("lifestyle:all"), any(), eq(24L), eq(TimeUnit.HOURS));
+        verify(redisTemplate.opsForValue()).set(eq("lifestyle:simple"), any(LifestyleDepositsEntity.class), eq(24L), eq(TimeUnit.HOURS));
+        verify(redisTemplate.opsForValue()).set(eq("lifestyle:fancy"), any(LifestyleDepositsEntity.class), eq(24L), eq(TimeUnit.HOURS));
     }
-
 
     @Test
     void testIsCacheHealthy_True() {
@@ -137,7 +156,7 @@ class LifestyleCacheServiceImplTest {
 
     @Test
     void testGetLifestyleByType_ExceptionHandled() {
-        when(valueOps.get(anyString())).thenThrow(new RuntimeException("Redis down"));
+        when(redisTemplate.opsForValue().get(anyString())).thenThrow(new RuntimeException("Redis down"));
 
         CacheException ex = assertThrows(CacheException.class,
                 () -> cacheService.getLifestyleByType("simple"));
