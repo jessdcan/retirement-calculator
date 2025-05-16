@@ -23,7 +23,6 @@ class LifestyleDepositsRepoTest {
         LifestyleDepositsEntity entity = LifestyleDepositsEntity.builder()
                 .lifestyleType("modest")
                 .monthlyDeposit(new BigDecimal("1000.00"))
-                .annualExpenses(new BigDecimal("12000.00"))
                 .description("Basic lifestyle")
                 .build();
 

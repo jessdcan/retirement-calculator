@@ -62,21 +62,6 @@ public class RetirementCalculatorResponseDTO {
     @Schema(description = "Required monthly deposit to reach retirement goal", example = "1000.00")
     private BigDecimal monthlyDeposit;
 
-    /**
-     * The annual expenses expected during retirement based on the lifestyle choice.
-     */
-    @Schema(description = "Expected annual expenses during retirement", example = "50000.00")
-    private BigDecimal annualExpenses;
+    private int yearsToRetirement;
 
-    /**
-     * The number of years the retirement savings will last.
-     */
-    @Schema(description = "Number of years retirement savings will last", example = "25")
-    private Integer yearsOfRetirement;
-
-    /**
-     * The percentage of retirement goal achieved.
-     */
-    @Schema(description = "Percentage of retirement goal achieved", example = "100.0")
-    private Double percentageOfGoalAchieved;
 }

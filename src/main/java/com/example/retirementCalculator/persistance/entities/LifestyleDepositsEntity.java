@@ -46,14 +46,6 @@ public class LifestyleDepositsEntity {
     private BigDecimal monthlyDeposit;
 
     /**
-     * The expected annual expenses for the lifestyle.
-     * Cannot be null.
-     */
-    @NotNull(message = "annualExpenses cannot be null")
-    @Column(name = "annual_expenses", nullable = false, precision = 12, scale = 2)
-    private BigDecimal annualExpenses;
-
-    /**
      * Optional description providing additional context or notes about the lifestyle type.
      */
     @Column(name = "description")

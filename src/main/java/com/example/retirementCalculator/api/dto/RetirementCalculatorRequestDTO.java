@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 /**
  * Data Transfer Object for retirement calculation requests.
  * <p>
@@ -70,4 +72,10 @@ public class RetirementCalculatorRequestDTO {
     @NotBlank(message = "Lifestyle type is required")
     @Schema(description = "Desired lifestyle type for retirement (e.g., simple, fancy)", example = "comfortable", required = true)
     private String lifestyleType;
+
+//    /**
+//     * The annual expenses expected during retirement based on the lifestyle choice.
+//     */
+//    @Schema(description = "Expected annual expenses during retirement", example = "50000.00")
+//    private BigDecimal annualExpenses;
 }
