@@ -42,6 +42,7 @@ public class RetirementCalculatorServiceImpl implements RetirementCalculatorServ
      */
     @Override
     public RetirementCalculatorResponseDTO calculateRetirementSavings(RetirementCalculatorRequestDTO request) {
+
         try {
             validateParameters(request);
         } catch (InvalidParameterException e) {
@@ -49,8 +50,10 @@ public class RetirementCalculatorServiceImpl implements RetirementCalculatorServ
             throw e;
         }
 
-
+        // Calculate the number of years until retirement
+        // Will be n >= 0 if validation is successful
         int years = request.getRetirementAge() - request.getCurrentAge();
+
         LifestyleDepositsEntity lifestyleEntity = lifestyleCacheService.getLifestyleByType(request.getLifestyleType())
                 .orElseThrow(() -> new LifestyleNotFoundException("Lifestyle type not found"));
         BigDecimal monthlyDeposit = lifestyleEntity.getMonthlyDeposit();
@@ -61,11 +64,7 @@ public class RetirementCalculatorServiceImpl implements RetirementCalculatorServ
         double monthlyRate = request.getInterestRate() / 100 / MONTHS_IN_YEAR;
         int months = years * MONTHS_IN_YEAR;
 
-        BigDecimal futureValue = monthlyDeposit
-                .multiply(
-                        BigDecimal.ONE.add(BigDecimal.valueOf(monthlyRate)).pow(months, MATH_CONTEXT).subtract(BigDecimal.ONE)
-                )
-                .divide(BigDecimal.valueOf(monthlyRate), MATH_CONTEXT);
+        BigDecimal futureValue = calculateFutureValue(monthlyDeposit, monthlyRate, months);
 
         log.info("Calculation complete: futureValue={}", futureValue);
 
@@ -78,6 +77,25 @@ public class RetirementCalculatorServiceImpl implements RetirementCalculatorServ
                 .interestRate(request.getInterestRate())
                 .lifestyleType(request.getLifestyleType())
                 .build();
+    }
+
+    /**
+     * Calculates the future value of a series of monthly deposits.
+     * <p>
+     * Uses the formula for the future value of a series of cash flows.
+     * </p>
+     *
+     * @param monthlyDeposit The amount deposited each month
+     * @param monthlyRate    The monthly interest rate
+     * @param months         The total number of months
+     * @return The future value of the deposits
+     */
+    private BigDecimal calculateFutureValue(BigDecimal monthlyDeposit, double monthlyRate, int months) {
+        return monthlyDeposit
+                .multiply(
+                        BigDecimal.ONE.add(BigDecimal.valueOf(monthlyRate)).pow(months, MATH_CONTEXT).subtract(BigDecimal.ONE)
+                )
+                .divide(BigDecimal.valueOf(monthlyRate), MATH_CONTEXT);
     }
 
     /**
