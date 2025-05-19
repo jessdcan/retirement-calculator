@@ -3,6 +3,7 @@ package com.example.retirementCalculator;
 import com.example.retirementCalculator.api.dto.RetirementCalculatorRequestDTO;
 import com.example.retirementCalculator.api.dto.RetirementCalculatorResponseDTO;
 import com.example.retirementCalculator.cache.LifestyleCacheService;
+import com.example.retirementCalculator.cache.LifestyleCacheServiceImpl;
 import com.example.retirementCalculator.exception.InvalidParameterException;
 import com.example.retirementCalculator.exception.LifestyleNotFoundException;
 import com.example.retirementCalculator.logic.RetirementCalculatorServiceImpl;
@@ -14,6 +15,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.lang.reflect.Method;
@@ -24,11 +28,13 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
+//@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@SpringBootTest
+@ActiveProfiles("test")
 class RetirementCalculatorServiceImplTest {
 
     @Mock
-    private LifestyleCacheService lifestyleCacheService;
+    private LifestyleCacheServiceImpl lifestyleCacheService;
 
     @InjectMocks
     private RetirementCalculatorServiceImpl calculatorService;
@@ -106,8 +112,8 @@ class RetirementCalculatorServiceImplTest {
         // Call the public method that would use calculateFutureValue internally
         RetirementCalculatorResponseDTO response = calculatorService.calculateRetirementSavings(request);
         
-        // Expected value for R2000 monthly at 0% for 5 years is exactly RMONTHS_IN_YEAR0,000
-        BigDecimal expected = new BigDecimal("MONTHS_IN_YEAR0000.00").setScale(2, RoundingMode.HALF_UP);
+        // Expected value for R2000 monthly at 0% for 5 years is exactly R120,000
+        BigDecimal expected = new BigDecimal("120000.00").setScale(2, RoundingMode.HALF_UP);
         
         assertEquals(expected, response.getTotalRetirementSavings());
     }
@@ -202,7 +208,7 @@ class RetirementCalculatorServiceImplTest {
             calculatorService.calculateRetirementSavings(request)
         );
         
-        assertEquals("Lifestyle type not found", exception.getMessage());
+        assertEquals("Lifestyle type not found: " + request.getLifestyleType(), exception.getMessage());
     }
     
     @Test
@@ -215,33 +221,27 @@ class RetirementCalculatorServiceImplTest {
         int months1 = MONTHS_IN_YEAR;
         BigDecimal result1 = (BigDecimal) calculateFutureValueMethod.invoke(
                 calculatorService, monthlyDeposit, monthlyRate, months1);
-        BigDecimal expected1 = new BigDecimal("MONTHS_IN_YEAR300").setScale(2, RoundingMode.HALF_UP);
+        BigDecimal expected1 = new BigDecimal("12335.56").setScale(2, RoundingMode.HALF_UP);
         BigDecimal actual1 = result1.setScale(2, RoundingMode.HALF_UP);
-        BigDecimal diff1 = expected1.subtract(actual1).abs();
-        BigDecimal tolerance1 = expected1.multiply(new BigDecimal("0.02"));
-        assertTrue(diff1.compareTo(tolerance1) < 0, 
+        assertEquals(expected1, actual1,
                 "1 year expected ~ " + expected1 + " but got " + actual1);
-        
+
         // Test case 2: 5 years
         int months2 = MONTHS_IN_YEAR * 5;
         BigDecimal result2 = (BigDecimal) calculateFutureValueMethod.invoke(
                 calculatorService, monthlyDeposit, monthlyRate, months2);
-        BigDecimal expected2 = new BigDecimal("69300").setScale(2, RoundingMode.HALF_UP);
+        BigDecimal expected2 = new BigDecimal("69770.03").setScale(2, RoundingMode.HALF_UP);
         BigDecimal actual2 = result2.setScale(2, RoundingMode.HALF_UP);
-        BigDecimal diff2 = expected2.subtract(actual2).abs();
-        BigDecimal tolerance2 = expected2.multiply(new BigDecimal("0.02"));
-        assertTrue(diff2.compareTo(tolerance2) < 0, 
+        assertEquals(expected2, actual2,
                 "5 years expected ~ " + expected2 + " but got " + actual2);
         
         // Test case 3: 20 years 
         int months3 = MONTHS_IN_YEAR * 20;
         BigDecimal result3 = (BigDecimal) calculateFutureValueMethod.invoke(
                 calculatorService, monthlyDeposit, monthlyRate, months3);
-        BigDecimal expected3 = new BigDecimal("440000").setScale(2, RoundingMode.HALF_UP);
+        BigDecimal expected3 = new BigDecimal("462040.90").setScale(2, RoundingMode.HALF_UP);
         BigDecimal actual3 = result3.setScale(2, RoundingMode.HALF_UP);
-        BigDecimal diff3 = expected3.subtract(actual3).abs();
-        BigDecimal tolerance3 = expected3.multiply(new BigDecimal("0.02"));
-        assertTrue(diff3.compareTo(tolerance3) < 0, 
+        assertEquals(expected3, actual3,
                 "20 years expected ~ " + expected3 + " but got " + actual3);
     }
     

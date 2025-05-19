@@ -2,6 +2,7 @@ package com.example.retirementCalculator.cache;
 
 import com.example.retirementCalculator.api.controllers.RetirementCalculatorController;
 import com.example.retirementCalculator.exception.CacheException;
+import com.example.retirementCalculator.exception.LifestyleNotFoundException;
 import com.example.retirementCalculator.persistance.entities.LifestyleDepositsEntity;
 import com.example.retirementCalculator.persistance.repositories.LifestyleDepositsRepo;
 import jakarta.annotation.PostConstruct;
@@ -76,6 +77,10 @@ public class LifestyleCacheServiceImpl implements LifestyleCacheService {
                             return lifestyle;
                         });
             }
+        } catch (LifestyleNotFoundException e) {
+
+            log.warn("Lifestyle type not found in cache or database: {}", lifestyleType);
+            throw new LifestyleNotFoundException(lifestyleType);
         } catch (Exception e) {
             log.error("Error retrieving lifestyle from cache: {}", e.getMessage(), e);
             throw new CacheException("Failed to retrieve lifestyle data from cache", e);

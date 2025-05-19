@@ -5,6 +5,7 @@ import com.example.retirementCalculator.persistance.entities.LifestyleDepositsEn
 import com.example.retirementCalculator.persistance.repositories.LifestyleDepositsRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,10 +25,12 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("test")
 class LifestyleCacheServiceImplTest {
+
+    @Mock
+    private LifestyleCacheServiceImpl lifestyleCacheService;
 
     @MockBean
     private RedisTemplate<String, Object> redisTemplate;
@@ -46,26 +49,7 @@ class LifestyleCacheServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        // Clear DB
-        lifestyleRepo.deleteAll();
-
-//        // Reset mocks
-//        reset(redisTemplate);
-
-        // Create test data and save to H2 database
-        simpleLifestyle = new LifestyleDepositsEntity();
-        simpleLifestyle.setLifestyleType("simple");
-        simpleLifestyle.setMonthlyDeposit(BigDecimal.valueOf(2000.00));
-        simpleLifestyle.setDescription("Basic lifestyle with moderate expenses");
-        lifestyleRepo.save(simpleLifestyle);
-
-        fancyLifestyle = new LifestyleDepositsEntity();
-        fancyLifestyle.setLifestyleType("fancy");
-        fancyLifestyle.setMonthlyDeposit(BigDecimal.valueOf(5000.00));
-        fancyLifestyle.setDescription("Luxury lifestyle with premium expenses");
-        lifestyleRepo.save(fancyLifestyle);
     }
 
     @Test

@@ -55,7 +55,7 @@ public class RetirementCalculatorServiceImpl implements RetirementCalculatorServ
         int years = request.getRetirementAge() - request.getCurrentAge();
 
         LifestyleDepositsEntity lifestyleEntity = lifestyleCacheService.getLifestyleByType(request.getLifestyleType())
-                .orElseThrow(() -> new LifestyleNotFoundException("Lifestyle type not found"));
+                .orElseThrow(() -> new LifestyleNotFoundException(request.getLifestyleType()));
         BigDecimal monthlyDeposit = lifestyleEntity.getMonthlyDeposit();
 
         log.info("Starting future value calculation: annualInterestRate={}, years={}, monthlyDeposit={}",
@@ -82,15 +82,30 @@ public class RetirementCalculatorServiceImpl implements RetirementCalculatorServ
     /**
      * Calculates the future value of a series of monthly deposits.
      * <p>
-     * Uses the formula for the future value of a series of cash flows.
+     * Uses the formula for the future value of a series of cash flows
+     * compounded at a given interest rate.
+     * </p>
+     * <p>
+     *     * Formula: FV = P * (((1 + r)^n - 1) / r)
+     * </p>
+     * <p>
+     *     Also accounts for the case where the interest rate is zero.
+     *     * In that case, the future value is simply the total of all deposits.
      * </p>
      *
      * @param monthlyDeposit The amount deposited each month
-     * @param monthlyRate    The monthly interest rate
-     * @param months         The total number of months
+     * @param monthlyRate    The monthly interest rate (annual rate / 12)
+     * @param months         The total number of months until retirement
      * @return The future value of the deposits
      */
     private BigDecimal calculateFutureValue(BigDecimal monthlyDeposit, double monthlyRate, int months) {
+        // Handle the zero interest rate case
+        if (monthlyRate == 0.0 || Math.abs(monthlyRate) < 1e-10) {
+            // With zero interest, future value is simply deposit × number of months
+            return monthlyDeposit.multiply(BigDecimal.valueOf(months));
+        }
+
+        // Standard compound interest formula for non-zero rates
         return monthlyDeposit
                 .multiply(
                         BigDecimal.ONE.add(BigDecimal.valueOf(monthlyRate)).pow(months, MATH_CONTEXT).subtract(BigDecimal.ONE)
