@@ -1,0 +1,64 @@
+<div class="calculator-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Retirement Calculator</mat-card-title>
+      <mat-card-subtitle>Calculate your future retirement savings</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="calculatorForm" (ngSubmit)="onSubmit()" class="calculator-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Current Age</mat-label>
+          <input matInput type="number" formControlName="currentAge" placeholder="Enter your current age">
+          <mat-error>{{ getErrorMessage('currentAge') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Retirement Age</mat-label>
+          <input matInput type="number" formControlName="retirementAge" placeholder="Enter your target retirement age">
+          <mat-error>{{ getErrorMessage('retirementAge') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Interest Rate (%)</mat-label>
+          <input matInput type="number" formControlName="interestRate" placeholder="Enter expected interest rate">
+          <mat-error>{{ getErrorMessage('interestRate') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Lifestyle Type</mat-label>
+          <mat-select formControlName="lifestyleType">
+            <mat-option value="simple">Simple</mat-option>
+            <mat-option value="fancy">Fancy</mat-option>
+          </mat-select>
+          <mat-error>{{ getErrorMessage('lifestyleType') }}</mat-error>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" [disabled]="!calculatorForm.valid || isLoading">
+          Calculate
+          <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+        </button>
+      </form>
+
+      <div class="results" *ngIf="calculationResult">
+        <h3>Calculation Results</h3>
+        <mat-card>
+          <mat-card-content>
+            <div class="result-item">
+              <span>Future Value:</span>
+              <span>{{ calculationResult.futureValue | currency }}</span>
+            </div>
+            <div class="result-item">
+              <span>Total Deposits:</span>
+              <span>{{ calculationResult.totalDeposits | currency }}</span>
+            </div>
+            <div class="result-item">
+              <span>Interest Earned:</span>
+              <span>{{ calculationResult.interestEarned | currency }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
