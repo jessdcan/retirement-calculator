@@ -71,6 +71,8 @@ public class RetirementCalculatorServiceImpl implements RetirementCalculatorServ
         RetirementCalculatorResponseDTO responseDTO = new RetirementCalculatorResponseDTO();
 
         return responseDTO.builder()
+                .currentAge(request.getCurrentAge())
+                .retirementAge(request.getRetirementAge())
                 .totalRetirementSavings(futureValue.setScale(RESULT_SCALE, RoundingMode.HALF_UP))
                 .yearsToRetirement(years)
                 .monthlyDeposit(monthlyDeposit)

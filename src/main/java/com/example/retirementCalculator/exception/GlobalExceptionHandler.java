@@ -192,46 +192,46 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
-    /**
-     * Handles {@link ConstraintViolationException}.
-     * <p>
-     * Maps to HTTP 400 (Bad Request) responses when constraint violations occur.
-     * </p>
-     *
-     * @param ex The exception
-     * @param request The current request
-     * @return A {@link ResponseEntity} with an appropriate error response
-     */
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponseDTO> handleConstraintViolationException(
-            ConstraintViolationException ex, WebRequest request) {
-
-        log.error("Constraint violation: {}", ex.getMessage());
-
-        List<ErrorResponseDTO.FieldErrorDto> fieldErrors = new ArrayList<>();
-        ex.getConstraintViolations().forEach(violation -> {
-            String propertyPath = violation.getPropertyPath().toString();
-            String fieldName = propertyPath.contains(".") ?
-                    propertyPath.substring(propertyPath.lastIndexOf('.') + 1) : propertyPath;
-
-            fieldErrors.add(ErrorResponseDTO.FieldErrorDto.builder()
-                    .field(fieldName)
-                    .message(violation.getMessage())
-                    .rejectedValue(violation.getInvalidValue())
-                    .build());
-        });
-
-        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error("Constraint Violation")
-                .message("Validation constraints violated")
-                .path(request.getDescription(false).replace("uri=", ""))
-                .fieldErrors(fieldErrors)
-                .build();
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
+//    /**
+//     * Handles {@link ConstraintViolationException}.
+//     * <p>
+//     * Maps to HTTP 400 (Bad Request) responses when constraint violations occur.
+//     * </p>
+//     *
+//     * @param ex The exception
+//     * @param request The current request
+//     * @return A {@link ResponseEntity} with an appropriate error response
+//     */
+//    @ExceptionHandler(ConstraintViolationException.class)
+//    public ResponseEntity<ErrorResponseDTO> handleConstraintViolationException(
+//            ConstraintViolationException ex, WebRequest request) {
+//
+//        log.error("Constraint violation: {}", ex.getMessage());
+//
+//        List<ErrorResponseDTO.FieldErrorDto> fieldErrors = new ArrayList<>();
+//        ex.getConstraintViolations().forEach(violation -> {
+//            String propertyPath = violation.getPropertyPath().toString();
+//            String fieldName = propertyPath.contains(".") ?
+//                    propertyPath.substring(propertyPath.lastIndexOf('.') + 1) : propertyPath;
+//
+//            fieldErrors.add(ErrorResponseDTO.FieldErrorDto.builder()
+//                    .field(fieldName)
+//                    .message(violation.getMessage())
+//                    .rejectedValue(violation.getInvalidValue())
+//                    .build());
+//        });
+//
+//        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+//                .timestamp(LocalDateTime.now())
+//                .status(HttpStatus.BAD_REQUEST.value())
+//                .error("Constraint Violation")
+//                .message("Validation constraints violated")
+//                .path(request.getDescription(false).replace("uri=", ""))
+//                .fieldErrors(fieldErrors)
+//                .build();
+//
+//        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+//    }
 
     /**
      * Fallback handler for all other exceptions.

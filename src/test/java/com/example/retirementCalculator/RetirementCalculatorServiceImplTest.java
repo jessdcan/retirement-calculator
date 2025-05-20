@@ -43,7 +43,7 @@ class RetirementCalculatorServiceImplTest {
     private LifestyleDepositsEntity fancyLifestyle;
     private Method calculateFutureValueMethod;
     private static final int MONTHS_IN_YEAR = 12;
-    
+
     @BeforeEach
     void setUp() throws Exception {
         // Setup mock data for lifestyles
@@ -70,25 +70,25 @@ class RetirementCalculatorServiceImplTest {
         BigDecimal monthlyDeposit = new BigDecimal("1000.00");
         double monthlyRate = 0.05 / MONTHS_IN_YEAR; // 5% annual rate
         int months = MONTHS_IN_YEAR * 10; // 10 years
-        
+
         // Invoke the private method directly using reflection
         BigDecimal result = (BigDecimal) calculateFutureValueMethod.invoke(
                 calculatorService, monthlyDeposit, monthlyRate, months);
-        
+
         // Expected value for R1000 monthly at 5% for 10 years is approximately R154,710
         BigDecimal expectedApprox = new BigDecimal("154710");
-        
+
         // Set the same scale for comparison
         BigDecimal resultRounded = result.setScale(2, RoundingMode.HALF_UP);
-        
+
         // Check if the result is within 1% of expected value
         BigDecimal diff = expectedApprox.subtract(resultRounded).abs();
         BigDecimal tolerance = expectedApprox.multiply(new BigDecimal("0.01"));
-        
-        assertTrue(diff.compareTo(tolerance) < 0, 
+
+        assertTrue(diff.compareTo(tolerance) < 0,
                 "Expected approximately " + expectedApprox + " but got " + resultRounded);
     }
-    
+
     @Test
     @DisplayName("Should calculate future value correctly with zero interest rate")
     void calculateFutureValueWithZeroInterest() throws Exception {
@@ -96,11 +96,11 @@ class RetirementCalculatorServiceImplTest {
         BigDecimal monthlyDeposit = new BigDecimal("1000.00");
         double monthlyRate = 0.0;
         int months = MONTHS_IN_YEAR * 5; // 5 years
-        
+
         // For zero interest, we need to mock the handling approach
         // Since division by zero would occur in the original formula
         when(lifestyleCacheService.getLifestyleByType("simple")).thenReturn(Optional.of(simpleLifestyle));
-        
+
         // Create a request with zero interest
         RetirementCalculatorRequestDTO request = RetirementCalculatorRequestDTO.builder()
                 .currentAge(30)
@@ -108,16 +108,16 @@ class RetirementCalculatorServiceImplTest {
                 .interestRate(0.0)
                 .lifestyleType("simple")
                 .build();
-        
+
         // Call the public method that would use calculateFutureValue internally
         RetirementCalculatorResponseDTO response = calculatorService.calculateRetirementSavings(request);
-        
+
         // Expected value for R2000 monthly at 0% for 5 years is exactly R120,000
         BigDecimal expected = new BigDecimal("120000.00").setScale(2, RoundingMode.HALF_UP);
-        
+
         assertEquals(expected, response.getTotalRetirementSavings());
     }
-    
+
     @Test
     @DisplayName("Should validate and throw exception for retirement age <= current age")
     void validateParametersWithInvalidAges() {
@@ -130,12 +130,12 @@ class RetirementCalculatorServiceImplTest {
                 .build();
 
         // Act & Assert
-        InvalidParameterException exception = assertThrows(InvalidParameterException.class, () -> 
+        InvalidParameterException exception = assertThrows(InvalidParameterException.class, () ->
             calculatorService.calculateRetirementSavings(request)
         );
-        
+
         assertEquals("Retirement age must be greater than current age", exception.getMessage());
-        
+
         // Arrange - retirement age equal to current age
         RetirementCalculatorRequestDTO request2 = RetirementCalculatorRequestDTO.builder()
                 .currentAge(65)
@@ -145,13 +145,13 @@ class RetirementCalculatorServiceImplTest {
                 .build();
 
         // Act & Assert
-        InvalidParameterException exception2 = assertThrows(InvalidParameterException.class, () -> 
+        InvalidParameterException exception2 = assertThrows(InvalidParameterException.class, () ->
             calculatorService.calculateRetirementSavings(request2)
         );
-        
+
         assertEquals("Retirement age must be greater than current age", exception2.getMessage());
     }
-    
+
     @Test
     @DisplayName("Should validate and throw exception for negative interest rate")
     void validateParametersWithNegativeInterestRate() {
@@ -164,13 +164,13 @@ class RetirementCalculatorServiceImplTest {
                 .build();
 
         // Act & Assert
-        InvalidParameterException exception = assertThrows(InvalidParameterException.class, () -> 
+        InvalidParameterException exception = assertThrows(InvalidParameterException.class, () ->
             calculatorService.calculateRetirementSavings(request)
         );
-        
+
         assertEquals("Interest rate cannot be negative", exception.getMessage());
     }
-    
+
     @Test
     @DisplayName("Should validate and throw exception for years to retirement > 100")
     void validateParametersWithExcessiveYearsToRetirement() {
@@ -183,13 +183,13 @@ class RetirementCalculatorServiceImplTest {
                 .build();
 
         // Act & Assert
-        InvalidParameterException exception = assertThrows(InvalidParameterException.class, () -> 
+        InvalidParameterException exception = assertThrows(InvalidParameterException.class, () ->
             calculatorService.calculateRetirementSavings(request)
         );
-        
+
         assertEquals("Years to retirement cannot exceed 100", exception.getMessage());
     }
-    
+
     @Test
     @DisplayName("Should throw LifestyleNotFoundException when lifestyle type not found")
     void calculateRetirementSavingsWithNonExistentLifestyle() {
@@ -204,19 +204,19 @@ class RetirementCalculatorServiceImplTest {
         when(lifestyleCacheService.getLifestyleByType("nonexistent")).thenReturn(Optional.empty());
 
         // Act & Assert
-        LifestyleNotFoundException exception = assertThrows(LifestyleNotFoundException.class, () -> 
+        LifestyleNotFoundException exception = assertThrows(LifestyleNotFoundException.class, () ->
             calculatorService.calculateRetirementSavings(request)
         );
-        
+
         assertEquals("Lifestyle type not found: " + request.getLifestyleType(), exception.getMessage());
     }
-    
+
     @Test
     @DisplayName("Should calculate future value correctly for different time periods")
     void calculateFutureValueForDifferentPeriods() throws Exception {
         BigDecimal monthlyDeposit = new BigDecimal("1000.00");
         double monthlyRate = 0.06 / MONTHS_IN_YEAR; // 6% annual rate
-        
+
         // Test case 1: 1 year
         int months1 = MONTHS_IN_YEAR;
         BigDecimal result1 = (BigDecimal) calculateFutureValueMethod.invoke(
@@ -234,8 +234,8 @@ class RetirementCalculatorServiceImplTest {
         BigDecimal actual2 = result2.setScale(2, RoundingMode.HALF_UP);
         assertEquals(expected2, actual2,
                 "5 years expected ~ " + expected2 + " but got " + actual2);
-        
-        // Test case 3: 20 years 
+
+        // Test case 3: 20 years
         int months3 = MONTHS_IN_YEAR * 20;
         BigDecimal result3 = (BigDecimal) calculateFutureValueMethod.invoke(
                 calculatorService, monthlyDeposit, monthlyRate, months3);
@@ -244,13 +244,13 @@ class RetirementCalculatorServiceImplTest {
         assertEquals(expected3, actual3,
                 "20 years expected ~ " + expected3 + " but got " + actual3);
     }
-    
+
     @Test
     @DisplayName("Should calculate future value correctly for different interest rates")
     void calculateFutureValueForDifferentRates() throws Exception {
         BigDecimal monthlyDeposit = new BigDecimal("1000.00");
         int months = MONTHS_IN_YEAR * 10; // 10 years
-        
+
         // Test case 1: 3% annual rate
         double monthlyRate1 = 0.03 / MONTHS_IN_YEAR;
         BigDecimal result1 = (BigDecimal) calculateFutureValueMethod.invoke(
@@ -260,7 +260,7 @@ class RetirementCalculatorServiceImplTest {
         // assert true flavour of assertEquals just to show the difference
         assertTrue(actual1.compareTo(expected1) == 0,
                 "3% rate expected ~ " + expected1 + " but got " + actual1);
-        
+
         // Test case 2: 7% annual rate
         double monthlyRate2 = 0.07 / MONTHS_IN_YEAR;
         BigDecimal result2 = (BigDecimal) calculateFutureValueMethod.invoke(
@@ -269,7 +269,7 @@ class RetirementCalculatorServiceImplTest {
         BigDecimal actual2 = result2.setScale(2, RoundingMode.HALF_UP);
         assertEquals(expected2, actual2,
                 "7% rate expected ~ " + expected2 + " but got " + actual2);
-        
+
         // Test case 3: 12% annual rate
         double monthlyRate3 = 0.12 / MONTHS_IN_YEAR;
         BigDecimal result3 = (BigDecimal) calculateFutureValueMethod.invoke(
@@ -279,25 +279,25 @@ class RetirementCalculatorServiceImplTest {
         assertEquals(expected3, actual3,
                 "12% rate expected ~ " + expected3 + " but got " + actual3);
     }
-    
+
     @Test
     @DisplayName("Should calculate future value correctly with very small interest rate")
     void calculateFutureValueWithSmallInterestRate() throws Exception {
         BigDecimal monthlyDeposit = new BigDecimal("1000.00");
         double monthlyRate = 0.0001 / MONTHS_IN_YEAR; // 0.01% annual rate
         int months = MONTHS_IN_YEAR * 5; // 5 years
-        
+
         BigDecimal result = (BigDecimal) calculateFutureValueMethod.invoke(
                 calculatorService, monthlyDeposit, monthlyRate, months);
-        
+
         // With very small interest, result should be very close to just sum of deposits
         BigDecimal expected = new BigDecimal("60000").setScale(2, RoundingMode.HALF_UP);
         BigDecimal actual = result.setScale(2, RoundingMode.HALF_UP);
-        
+
         BigDecimal diff = expected.subtract(actual).abs();
         BigDecimal tolerance = expected.multiply(new BigDecimal("0.001")); // 0.1% tolerance
-        
-        assertTrue(diff.compareTo(tolerance) < 0, 
+
+        assertTrue(diff.compareTo(tolerance) < 0,
                 "With tiny interest, expected close to " + expected + " but got " + actual);
     }
 }
