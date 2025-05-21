@@ -1,0 +1,13 @@
+export interface RetirementCalculationRequest {
+  currentAge: number;
+  retirementAge: number;
+  interestRate: number;
+  lifestyleType: 'simple' | 'fancy';
+}
+
+export const LIFESTYLE_TYPES = {
+  SIMPLE: 'simple',
+  FANCY: 'fancy'
+} as const;
+
+export type LifestyleType = typeof LIFESTYLE_TYPES[keyof typeof LIFESTYLE_TYPES]; 
