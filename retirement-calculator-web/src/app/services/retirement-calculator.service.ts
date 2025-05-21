@@ -10,20 +10,24 @@ export interface RetirementCalculationRequest {
 }
 
 export interface RetirementCalculationResponse {
-  futureValue: number;
-  totalDeposits: number;
-  interestEarned: number;
+  currentAge: number;
+  retirementAge: number;
+  interestRate: number;
+  lifestyleType: string;
+  totalRetirementSavings: number;
+  monthlyDeposit: number;
+  yearsToRetirement: number;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class RetirementCalculatorService {
-  private apiUrl = 'http://localhost:8080/api/v1/calculator'; // Update this with your actual API endpoint
+  private apiUrl = 'http://localhost:8080/api/v1/calculator';
 
   constructor(private http: HttpClient) { }
 
   calculateRetirement(request: RetirementCalculationRequest): Observable<RetirementCalculationResponse> {
-    return this.http.post<RetirementCalculationResponse>(`${this.apiUrl}/calculate`, request);
+    return this.http.post<RetirementCalculationResponse>(`${this.apiUrl}/retirement`, request);
   }
 } 

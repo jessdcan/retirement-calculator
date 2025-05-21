@@ -1,14 +1,15 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { RetirementCalculatorService, RetirementCalculationRequest, RetirementCalculationResponse } from '../services/retirement-calculator.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-calculator',
@@ -22,7 +23,8 @@ import { RetirementCalculatorService, RetirementCalculationRequest, RetirementCa
     MatSelectModule,
     MatButtonModule,
     MatCardModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSnackBarModule
   ],
   templateUrl: './calculator.component.html',
   styleUrls: ['./calculator.component.css']
@@ -42,23 +44,51 @@ export class CalculatorComponent {
       retirementAge: ['', [Validators.required, Validators.min(18), Validators.max(100)]],
       interestRate: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
       lifestyleType: ['simple', Validators.required]
-    });
+    }, { validators: this.ageComparisonValidator });
+  }
+
+  // Custom validator to ensure retirement age is greater than current age
+  private ageComparisonValidator(group: AbstractControl): ValidationErrors | null {
+    const currentAge = group.get('currentAge')?.value;
+    const retirementAge = group.get('retirementAge')?.value;
+
+    if (currentAge && retirementAge && currentAge >= retirementAge) {
+      return { ageComparison: true };
+    }
+    return null;
   }
 
   onSubmit() {
     if (this.calculatorForm.valid) {
       this.isLoading = true;
-      const request: RetirementCalculationRequest = this.calculatorForm.value;
+      
+      // Format the request data
+      const formValue = this.calculatorForm.value;
+      const request: RetirementCalculationRequest = {
+        currentAge: Number(formValue.currentAge),
+        retirementAge: Number(formValue.retirementAge),
+        interestRate: Number(formValue.interestRate),
+        lifestyleType: formValue.lifestyleType
+      };
       
       this.calculatorService.calculateRetirement(request).subscribe({
         next: (response) => {
           this.calculationResult = response;
           this.isLoading = false;
         },
-        error: (error) => {
+        error: (error: HttpErrorResponse) => {
           this.isLoading = false;
-          this.snackBar.open('Error calculating retirement savings. Please try again.', 'Close', {
-            duration: 5000
+          let errorMessage = 'Error calculating retirement savings.';
+          
+          if (error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.error?.error) {
+            errorMessage = error.error.error;
+          }
+          
+          this.snackBar.open(errorMessage, 'Close', {
+            duration: 5000,
+            panelClass: ['error-snackbar']
           });
           console.error('Calculation error:', error);
         }
@@ -76,6 +106,13 @@ export class CalculatorComponent {
     }
     if (control?.hasError('max')) {
       return `Maximum value is ${control.errors?.['max'].max}`;
+    }
+    return '';
+  }
+
+  getAgeComparisonError(): string {
+    if (this.calculatorForm.hasError('ageComparison')) {
+      return 'Retirement age must be greater than current age';
     }
     return '';
   }

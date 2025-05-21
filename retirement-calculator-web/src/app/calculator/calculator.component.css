@@ -52,3 +52,19 @@ button[type="submit"] {
 .result-item span:last-child {
   color: rgba(0, 0, 0, 0.6);
 }
+
+.form-error {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: -0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+::ng-deep .error-snackbar {
+  background: #f44336;
+  color: white;
+}
+
+::ng-deep .error-snackbar .mat-simple-snackbar-action {
+  color: white;
+}

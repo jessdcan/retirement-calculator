@@ -19,6 +19,10 @@
           <mat-error>{{ getErrorMessage('retirementAge') }}</mat-error>
         </mat-form-field>
 
+        <div class="form-error" *ngIf="calculatorForm.hasError('ageComparison')">
+          {{ getAgeComparisonError() }}
+        </div>
+
         <mat-form-field appearance="outline">
           <mat-label>Interest Rate (%)</mat-label>
           <input matInput type="number" formControlName="interestRate" placeholder="Enter expected interest rate">
@@ -45,16 +49,24 @@
         <mat-card>
           <mat-card-content>
             <div class="result-item">
-              <span>Future Value:</span>
-              <span>{{ calculationResult.futureValue | currency }}</span>
+              <span>Total Retirement Savings:</span>
+              <span>{{ calculationResult.totalRetirementSavings | currency:'ZAR' }}</span>
             </div>
             <div class="result-item">
-              <span>Total Deposits:</span>
-              <span>{{ calculationResult.totalDeposits | currency }}</span>
+              <span>Monthly Deposit Required:</span>
+              <span>{{ calculationResult.monthlyDeposit | currency:'ZAR' }}</span>
             </div>
             <div class="result-item">
-              <span>Interest Earned:</span>
-              <span>{{ calculationResult.interestEarned | currency }}</span>
+              <span>Years to Retirement:</span>
+              <span>{{ calculationResult.yearsToRetirement }} years</span>
+            </div>
+            <div class="result-item">
+              <span>Interest Rate:</span>
+              <span>{{ calculationResult.interestRate }}%</span>
+            </div>
+            <div class="result-item">
+              <span>Lifestyle Type:</span>
+              <span>{{ calculationResult.lifestyleType | titlecase }}</span>
             </div>
           </mat-card-content>
         </mat-card>
