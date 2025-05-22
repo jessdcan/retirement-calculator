@@ -1,7 +1,6 @@
 export interface RetirementCalculationRequest {
   currentAge: number;
   retirementAge: number;
-  interestRate: number;
   lifestyleType: 'simple' | 'fancy';
 }
 

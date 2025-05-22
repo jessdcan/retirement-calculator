@@ -105,7 +105,6 @@ class RetirementCalculatorServiceImplTest {
         RetirementCalculatorRequestDTO request = RetirementCalculatorRequestDTO.builder()
                 .currentAge(30)
                 .retirementAge(35)
-                .interestRate(0.0)
                 .lifestyleType("simple")
                 .build();
 
@@ -125,7 +124,6 @@ class RetirementCalculatorServiceImplTest {
         RetirementCalculatorRequestDTO request = RetirementCalculatorRequestDTO.builder()
                 .currentAge(65)
                 .retirementAge(60)
-                .interestRate(5.0)
                 .lifestyleType("simple")
                 .build();
 
@@ -140,7 +138,6 @@ class RetirementCalculatorServiceImplTest {
         RetirementCalculatorRequestDTO request2 = RetirementCalculatorRequestDTO.builder()
                 .currentAge(65)
                 .retirementAge(65)
-                .interestRate(5.0)
                 .lifestyleType("simple")
                 .build();
 
@@ -159,7 +156,6 @@ class RetirementCalculatorServiceImplTest {
         RetirementCalculatorRequestDTO request = RetirementCalculatorRequestDTO.builder()
                 .currentAge(30)
                 .retirementAge(65)
-                .interestRate(-2.5)
                 .lifestyleType("simple")
                 .build();
 
@@ -178,7 +174,6 @@ class RetirementCalculatorServiceImplTest {
         RetirementCalculatorRequestDTO request = RetirementCalculatorRequestDTO.builder()
                 .currentAge(30)
                 .retirementAge(131)  // 101 years difference
-                .interestRate(5.0)
                 .lifestyleType("simple")
                 .build();
 
@@ -197,7 +192,6 @@ class RetirementCalculatorServiceImplTest {
         RetirementCalculatorRequestDTO request = RetirementCalculatorRequestDTO.builder()
                 .currentAge(30)
                 .retirementAge(65)
-                .interestRate(5.0)
                 .lifestyleType("nonexistent")
                 .build();
 

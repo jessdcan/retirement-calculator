@@ -45,7 +45,6 @@ public class RetirementCalculatorControllerTest {
         validRequest = RetirementCalculatorRequestDTO.builder()
                 .currentAge(30)
                 .retirementAge(65)
-                .interestRate(5.0)
                 .lifestyleType("simple")
                 .build();
 

@@ -47,7 +47,6 @@ public class ExceptionHandlerTest {
         validRequest = RetirementCalculatorRequestDTO.builder()
                 .currentAge(30)
                 .retirementAge(65)
-                .interestRate(5.0)
                 .lifestyleType("simple")
                 .build();
     }
@@ -135,7 +134,6 @@ public class ExceptionHandlerTest {
         RetirementCalculatorRequestDTO invalidRequest = RetirementCalculatorRequestDTO.builder()
                 .currentAge(18) // Invalid age
                 .retirementAge(60)
-                .interestRate(7.0)
                 .lifestyleType(null) // Invalid lifestyle
                 .build();
 
@@ -168,7 +166,6 @@ public class ExceptionHandlerTest {
         RetirementCalculatorRequestDTO requestWithViolation = RetirementCalculatorRequestDTO.builder()
                 .currentAge(10)
                 .retirementAge(70)
-                .interestRate(10.0)
                 .lifestyleType("fancy")
                 .build();
 

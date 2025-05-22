@@ -22,9 +22,11 @@ export class RetirementCalculatorService {
   }
 
   private validateResponse(response: RetirementCalculationResponse): RetirementCalculationResponse {
-    if (!response || typeof response.totalRetirementSavings !== 'number' || 
+    if (!response || 
+        typeof response.totalRetirementSavings !== 'number' || 
         typeof response.monthlyDeposit !== 'number' || 
-        typeof response.yearsToRetirement !== 'number') {
+        typeof response.yearsToRetirement !== 'number' ||
+        typeof response.interestRate !== 'number') {
       throw new Error('Invalid response format from server');
     }
     return response;

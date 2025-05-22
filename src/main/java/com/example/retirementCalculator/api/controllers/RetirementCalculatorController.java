@@ -2,7 +2,8 @@ package com.example.retirementCalculator.api.controllers;
 
 import com.example.retirementCalculator.api.dto.RetirementCalculatorRequestDTO;
 import com.example.retirementCalculator.api.dto.RetirementCalculatorResponseDTO;
-import com.example.retirementCalculator.logic.RetirementCalculatorService;
+import com.example.retirementCalculator.domain.RetirementCalculation;
+import com.example.retirementCalculator.domain.RetirementCalculationBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,11 +18,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 /**
  * REST Controller for retirement calculator operations.
  * <p>
  * Provides endpoints for calculating retirement savings based on user input.
  * Supports both JSON and XML formats for request and response.
+ * Uses domain objects to handle business logic and calculations.
  * </p>
  *
  * @author Your Name
@@ -36,13 +40,14 @@ public class RetirementCalculatorController {
 
     private Logger log = org.slf4j.LoggerFactory.getLogger(RetirementCalculatorController.class);
 
-    private final RetirementCalculatorService calculatorService;
+    private final RetirementCalculationBuilder calculationBuilder;
 
     /**
      * Calculates retirement savings based on provided parameters.
      * <p>
      * This endpoint accepts retirement calculation parameters and returns
-     * detailed projections for retirement savings.
+     * detailed projections for retirement savings. The calculation is performed
+     * using domain objects that encapsulate the business logic.
      * </p>
      *
      * @param request The calculation request parameters
@@ -50,7 +55,7 @@ public class RetirementCalculatorController {
      */
     @Operation(
             summary = "Calculate retirement savings",
-            description = "Calculates future retirement savings based on current age, retirement age, interest rate, and lifestyle preferences"
+            description = "Calculates future retirement savings based on current age, retirement age and lifestyle preferences"
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -89,7 +94,23 @@ public class RetirementCalculatorController {
         log.info("Received retirement calculation request for age: {}, retirement age: {}, lifestyle: {}",
                 request.getCurrentAge(), request.getRetirementAge(), request.getLifestyleType());
 
-        RetirementCalculatorResponseDTO response = calculatorService.calculateRetirementSavings(request);
+        // Build and calculate using domain objects
+        RetirementCalculation calculation = calculationBuilder.build(
+                request.getCurrentAge(),
+                request.getRetirementAge(),
+                request.getLifestyleType()
+        );
+
+        // Convert domain object to response DTO
+        RetirementCalculatorResponseDTO response = RetirementCalculatorResponseDTO.builder()
+                .currentAge(calculation.getCurrentAge())
+                .retirementAge(calculation.getRetirementAge())
+                .lifestyleType(calculation.getLifestyleType())
+                .interestRate(calculation.getInterestRate().doubleValue())
+                .monthlyDeposit(calculation.getMonthlyDeposit())
+                .totalRetirementSavings(calculation.calculateFutureValue())
+                .yearsToRetirement(calculation.getRetirementAge() - calculation.getCurrentAge())
+                .build();
 
         log.info("Calculation completed successfully. Total retirement savings: {}", response.getTotalRetirementSavings());
 

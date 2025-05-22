@@ -1,17 +1,15 @@
 package com.example.retirementCalculator.api.dto;
 
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
-
-import java.math.BigDecimal;
 
 /**
  * Data Transfer Object for retirement calculation requests.
  * <p>
  * Contains validated input parameters required for retirement savings calculations.
- * This DTO is used to receive data from API clients and pass it to the calculator service.
+ * This DTO is used to receive data from API clients and pass it to the domain layer.
+ * Interest rates are now handled internally by the domain layer based on lifestyle type.
  * </p>
  *
  * @author Your Name
@@ -51,22 +49,11 @@ public class RetirementCalculatorRequestDTO {
     private Integer retirementAge;
 
     /**
-     * The expected annual interest rate as a percentage.
-     * <p>
-     * Must be a positive number between 0 and 20.
-     * </p>
-     */
-    @NotNull(message = "Interest rate is required")
-    @DecimalMin(value = "0.0", message = "Interest rate must be greater than or equal to 0")
-    @DecimalMax(value = "20.0", message = "Interest rate must be less than or equal to 20")
-    @Schema(description = "Expected annual interest rate as a percentage", example = "5.5", required = true)
-    private Double interestRate;
-
-    /**
      * The desired lifestyle type for retirement planning.
      * <p>
      * Must be a non-empty string.
      * Typical values include "simple", "fancy", "modest", "comfortable".
+     * The interest rate will be determined based on this lifestyle type.
      * </p>
      */
     @NotBlank(message = "Lifestyle type is required")

@@ -24,12 +24,6 @@
         </div>
 
         <mat-form-field appearance="outline">
-          <mat-label>Interest Rate (%)</mat-label>
-          <input matInput type="number" formControlName="interestRate" placeholder="Enter expected interest rate">
-          <mat-error>{{ getErrorMessage('interestRate') }}</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
           <mat-label>Lifestyle Type</mat-label>
           <mat-select formControlName="lifestyleType">
             <mat-option value="simple">Simple</mat-option>
@@ -61,12 +55,12 @@
               <span>{{ calculationResult.yearsToRetirement }} years</span>
             </div>
             <div class="result-item">
-              <span>Interest Rate:</span>
-              <span>{{ calculationResult.interestRate }}%</span>
-            </div>
-            <div class="result-item">
               <span>Lifestyle Type:</span>
               <span>{{ calculationResult.lifestyleType | titlecase }}</span>
+            </div>
+            <div class="result-item">
+              <span>Interest Rate:</span>
+              <span>{{ calculationResult.interestRate }}%</span>
             </div>
           </mat-card-content>
         </mat-card>

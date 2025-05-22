@@ -48,7 +48,6 @@ export class CalculatorComponent {
     this.calculatorForm = this.fb.group({
       currentAge: ['', [Validators.required, Validators.min(18), Validators.max(100)]],
       retirementAge: ['', [Validators.required, Validators.min(18), Validators.max(100)]],
-      interestRate: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
       lifestyleType: [LIFESTYLE_TYPES.SIMPLE, Validators.required]
     }, { validators: this.ageComparisonValidator });
   }
@@ -87,7 +86,6 @@ export class CalculatorComponent {
     return {
       currentAge: Number(formValue.currentAge),
       retirementAge: Number(formValue.retirementAge),
-      interestRate: Number(formValue.interestRate),
       lifestyleType: formValue.lifestyleType
     };
   }
