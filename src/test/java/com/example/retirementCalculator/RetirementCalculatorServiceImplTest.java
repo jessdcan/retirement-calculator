@@ -6,7 +6,6 @@ import com.example.retirementCalculator.cache.LifestyleCacheService;
 import com.example.retirementCalculator.cache.LifestyleCacheServiceImpl;
 import com.example.retirementCalculator.exception.InvalidParameterException;
 import com.example.retirementCalculator.exception.LifestyleNotFoundException;
-import com.example.retirementCalculator.logic.RetirementCalculatorServiceImpl;
 import com.example.retirementCalculator.persistance.entities.LifestyleDepositsEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { RetirementCalculatorService } from '../services/retirement-calculator.service';
 import { RetirementCalculationRequest, LIFESTYLE_TYPES } from '../models/retirement-request.model';
 import { RetirementCalculationResponse } from '../models/retirement-response.model';
@@ -25,7 +26,8 @@ import { RetirementCalculationResponse } from '../models/retirement-response.mod
     MatButtonModule,
     MatCardModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatSlideToggleModule
   ],
   templateUrl: './calculator.component.html',
   styleUrls: ['./calculator.component.css']
@@ -48,8 +50,23 @@ export class CalculatorComponent {
     this.calculatorForm = this.fb.group({
       currentAge: ['', [Validators.required, Validators.min(18), Validators.max(100)]],
       retirementAge: ['', [Validators.required, Validators.min(18), Validators.max(100)]],
-      lifestyleType: [LIFESTYLE_TYPES.SIMPLE, Validators.required]
+      lifestyleType: [LIFESTYLE_TYPES.SIMPLE, Validators.required],
+      useCustomInterestRate: [false],
+      customInterestRate: [{ value: '', disabled: true }, [Validators.min(0), Validators.max(100)]]
     }, { validators: this.ageComparisonValidator });
+
+    // Subscribe to useCustomInterestRate changes to enable/disable customInterestRate control
+    this.calculatorForm.get('useCustomInterestRate')?.valueChanges.subscribe(useCustom => {
+      const customInterestRateControl = this.calculatorForm.get('customInterestRate');
+      if (useCustom) {
+        customInterestRateControl?.enable();
+        customInterestRateControl?.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
+      } else {
+        customInterestRateControl?.disable();
+        customInterestRateControl?.clearValidators();
+      }
+      customInterestRateControl?.updateValueAndValidity();
+    });
   }
 
   // Custom validator to ensure retirement age is greater than current age
@@ -86,7 +103,8 @@ export class CalculatorComponent {
     return {
       currentAge: Number(formValue.currentAge),
       retirementAge: Number(formValue.retirementAge),
-      lifestyleType: formValue.lifestyleType
+      lifestyleType: formValue.lifestyleType,
+      customInterestRate: formValue.useCustomInterestRate ? Number(formValue.customInterestRate) : undefined
     };
   }
 

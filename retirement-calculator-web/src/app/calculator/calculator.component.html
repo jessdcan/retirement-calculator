@@ -4,6 +4,7 @@
       <mat-card-title>Retirement Calculator</mat-card-title>
       <mat-card-subtitle>Calculate your future retirement savings</mat-card-subtitle>
     </mat-card-header>
+    <br>
 
     <mat-card-content>
       <form [formGroup]="calculatorForm" (ngSubmit)="onSubmit()" class="calculator-form">
@@ -32,6 +33,18 @@
           <mat-error>{{ getErrorMessage('lifestyleType') }}</mat-error>
         </mat-form-field>
 
+        <div class="custom-interest-rate">
+          <mat-slide-toggle formControlName="useCustomInterestRate">
+            Custom Interest Rate
+          </mat-slide-toggle>
+
+          <mat-form-field appearance="outline" *ngIf="calculatorForm.get('useCustomInterestRate')?.value">
+            <mat-label>Interest Rate (%)</mat-label>
+            <input matInput type="number" formControlName="customInterestRate" placeholder="Enter interest rate (0-100)">
+            <mat-error>{{ getErrorMessage('customInterestRate') }}</mat-error>
+          </mat-form-field>
+        </div>
+
         <button mat-raised-button color="primary" type="submit" [disabled]="!calculatorForm.valid || isLoading">
           Calculate
           <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
@@ -44,11 +57,11 @@
           <mat-card-content>
             <div class="result-item">
               <span>Total Retirement Savings:</span>
-              <span>{{ calculationResult.totalRetirementSavings | currency:'R' }}</span>
+              <span style="font-weight: bold">{{ calculationResult.totalRetirementSavings | currency:'R' }}</span>
             </div>
             <div class="result-item">
               <span>Monthly Deposit Required:</span>
-              <span>{{ calculationResult.monthlyDeposit | currency:'R' }}</span>
+              <span style="font-weight: bold">{{ calculationResult.monthlyDeposit | currency:'R' }}</span>
             </div>
             <div class="result-item">
               <span>Years to Retirement:</span>
