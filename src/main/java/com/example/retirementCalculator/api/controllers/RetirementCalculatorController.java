@@ -97,7 +97,8 @@ public class RetirementCalculatorController {
         RetirementCalculation calculation = calculationBuilder.build(
                 request.getCurrentAge(),
                 request.getRetirementAge(),
-                request.getLifestyleType()
+                request.getLifestyleType(),
+                request.getCustomInterestRate()
         );
 
         // Convert domain object to response DTO

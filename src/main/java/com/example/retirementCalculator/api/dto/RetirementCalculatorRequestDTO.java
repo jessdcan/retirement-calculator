@@ -3,6 +3,7 @@ package com.example.retirementCalculator.api.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import java.math.BigDecimal;
 
 /**
  * Data Transfer Object for retirement calculation requests.
@@ -47,6 +48,15 @@ public class RetirementCalculatorRequestDTO {
     @Max(value = 100, message = "Retirement age must be less than or equal to 100 years")
     @Schema(description = "Expected retirement age in years", example = "65", required = true)
     private Integer retirementAge;
+
+    /**
+     * Optional custom interest rate to use for the calculation.
+     * If not provided, the system will use the interest rate from the cache based on lifestyle type.
+     */
+    @Min(value = 0, message = "Interest rate must be greater than or equal to 0")
+    @Max(value = 100, message = "Interest rate must be less than or equal to 100")
+    @Schema(description = "Optional custom interest rate as a percentage", example = "5.5")
+    private BigDecimal customInterestRate;
 
     /**
      * The desired lifestyle type for retirement planning.
